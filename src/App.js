@@ -1,25 +1,23 @@
-import logo from './logo.svg';
 import './App.css';
-
+import Main from './components';
+import {Navbar,Button} from "react-bootstrap";
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div >
+      <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+    <div className="container">
+  <Navbar.Brand href="#home">Online Compiler</Navbar.Brand>
+  </div>
+  <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+  <div className="container">
+  <Navbar.Collapse id="responsive-navbar-nav" className="justify-content-end">
+     <Button variant="secondary">Login</Button>
+  </Navbar.Collapse>
+  </div>
+</Navbar>
+  <br></br>
+      <Main/>      
     </div>
-  );
+    );
 }
-
 export default App;
