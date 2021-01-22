@@ -145,8 +145,9 @@ return(
         :<Output/>}
         </Col>
     </Row>
-
+    <br></br>
 </Container>
+
 );
 }
 export default Main;
