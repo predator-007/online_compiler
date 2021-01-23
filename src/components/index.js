@@ -1,27 +1,33 @@
-import { React,useState } from "react";
+import { React,useEffect,useState} from "react";
 import  Container  from "react-bootstrap/Container";
 import { Row,Col,Button } from "react-bootstrap";
 import Editor from "./editor";
+import  temp  from "./template";
 import Input from "./input";
 import Output from "./output";
 import Axios from 'axios';
+import Savedcode from './savedcode';
 import { useSelector,useDispatch } from "react-redux";
-import { langaction, outputaction } from "../react-redux/actions";
+import { savedcodeaction,langaction, outputaction, sourcecodeaction, inputaction } from "../react-redux/actions";
 import Spinner from 'react-bootstrap/Spinner';
 import  Dropdown from "react-bootstrap/Dropdown";
 import Collapse from "@material-ui/core/Collapse";
 import {themeaction} from '../react-redux/actions';
+import { OverlayTrigger,Tooltip } from "react-bootstrap";
 import db from '../index'; 
+import './style.css';
 const Main=()=>{
-    const [sourcecode,setsourcecode]=useState(null);
     const [open,setopen]=useState(true);
     const dispatch=useDispatch();
+    const [mainopen,setmainopen]=useState(true);
     const [isloading,setloading]=useState(false);
+    const sourcecode=useSelector(state=>state.sourcecodered);
     const input=useSelector(state=>state.inpred);
     const status=useSelector(state=>state.opstatusred);
     const theme=useSelector(state=>state.themered);
     const lang=useSelector(state=>state.langred);
     const res=useSelector(state=>state.cmpred);
+    const user=useSelector(state=>state.userred);
     const obj={
         "Python": "24",
         "C++14": "7",
@@ -33,14 +39,15 @@ const Main=()=>{
             "Python":"",
           }
     const get =async ()=>{
+        console.log(sourcecode);
         return Axios({
         method :"post",
         headers:{"content-type": "application/json"},
         url:'https://cors-anywhere.herokuapp.com/https://rextester.com/rundotnet/api',
         data:JSON.stringify({
             LanguageChoice :obj[lang],
-            Program:  sourcecode,
-            Input: input,
+            Program:sourcecode,
+            Input:input,
             CompilerArgs:args[lang],
          }),
         })
@@ -60,32 +67,75 @@ const Main=()=>{
     }
     const savecode=()=>{
         const name=prompt("Enter the name of code");
-        const date=new Date();
+        var currentdate = new Date(); 
         if(name){
         db.collection('code').add({
             name:name,
+            author:user,
             ...res,
             input:input,
             opstatus:status,
             lang:lang,
-            date:date.getDate(),
-            time:date.getTime(),
+            sourcecode:sourcecode,
+            date:currentdate.getDate() + "/"
+            + (currentdate.getMonth()+1)  + "/" 
+            + currentdate.getFullYear() + " @ "  
+            + currentdate.getHours() + ":"  
+            + currentdate.getMinutes() + ":" 
+            + currentdate.getSeconds(),
         })
         }
     }
+    const handlesavedcode=async ()=>{
+        var data=[]
+        var codeRef = db.collection('code').where("author","==",user);
+        try {
+            var allCodeSnapShot = await codeRef.get();
+            allCodeSnapShot.forEach(doc => {
+                data.push({...doc.data(),id:doc.id})
+            });
+            dispatch(savedcodeaction(data))
+        }
+        catch (err) {
+            console.log('Error getting documents', err);
+        }
+    }
+    const renderTooltip = (props) => (
+        <Tooltip id="button-tooltip" {...props}>
+          Requires Login
+        </Tooltip>
+        );
+        const reset=()=>{
+            localStorage.clear();
+            dispatch(sourcecodeaction(temp[lang]));
+            dispatch(inputaction(""));
+        }
+        useEffect(()=>{
+            const inp=localStorage.getItem("input");
+            const scode=localStorage.getItem("sourcecode");
+            const lan=localStorage.getItem("lang");
+            const them=localStorage.getItem("theme");
+            if(inp)
+            dispatch(inputaction(inp));
+            if(scode)
+            dispatch(sourcecodeaction(scode));
+            if(lan)
+            dispatch(langaction(lan));
+            if(them)
+            dispatch(themeaction(them));
+        },[]);
 return(
+<Container>
+<Collapse in={mainopen}>
 <Container>
     <Row>
     <Col sm="12" md="10" className="editor">
-    <Editor 
-    setsourcecode={setsourcecode}
-    />
+    <Editor/>
     </Col>
-    <Col sm="12" md="2"  className="d-flex order-direction justify-content-evenly">
-        <div className="container">
-        <Dropdown>
+    <Col sm="12" md="2" id="options">
+        <Dropdown >
         <Dropdown.Toggle
-        variant="outline-danger"
+        variant="danger"
         >{lang}</Dropdown.Toggle>
         <Dropdown.Menu>
             <Dropdown.Item onClick={()=>dispatch(langaction("C"))}>C</Dropdown.Item>
@@ -93,22 +143,42 @@ return(
             <Dropdown.Item onClick={()=>dispatch(langaction("Python"))}>Python</Dropdown.Item>
         </Dropdown.Menu>
         </Dropdown>
-        </div>
-        <div className="container">
+        
         <Dropdown>
         <Dropdown.Toggle
-        variant="outline-info"
+        variant="warning"
         >{theme}</Dropdown.Toggle>
         <Dropdown.Menu>
             <Dropdown.Item onClick={()=>dispatch(themeaction("light"))}>Light</Dropdown.Item>
             <Dropdown.Item onClick={()=>dispatch(themeaction("dark"))}>Dark</Dropdown.Item>
         </Dropdown.Menu>
         </Dropdown>
-        </div>
-        <div className="container">
-            <Button variant="outline-info" onClick={()=>savecode()}>Save code</Button>
-        </div>
-    </Col>        
+        
+        <Button variant="danger" onClick={()=>{reset()}}>Reset</Button>
+        
+        <OverlayTrigger
+                placement="top-start"
+                delay={{ show: 250, hide: 400 }}
+                overlay={renderTooltip}
+                >
+            <Button active={user?true:false} variant="primary" onClick={()=>
+                {
+                    if(user){
+                    savecode();
+                    }
+                }
+                }>Save code</Button>
+            </OverlayTrigger>
+            <OverlayTrigger
+                placement="top-start"
+                delay={{ show: 250, hide: 400 }}
+                overlay={renderTooltip}
+                >
+            <Button active={user?true:false} variant="outline-info" onClick={()=>
+                { if(user){handlesavedcode();setmainopen(!mainopen)}
+                }}>List Code</Button>
+            </OverlayTrigger>
+          </Col>        
     </Row>
     <br></br>
     <Row>
@@ -166,8 +236,17 @@ return(
         </Col>
     </Row>
     <br></br>
+    </Container>
+    </Collapse>
+    <Collapse in={!mainopen}>
+    <Container>
+    <Button variant="secondary" onClick={()=>setmainopen(!mainopen)}>Back</Button>
+    <Savedcode handlesavedcode={handlesavedcode}
+                setmainopen={setmainopen}
+                mainopen={mainopen}/>
+    </Container>
+    </Collapse>
 </Container>
-
 );
 }
 export default Main;

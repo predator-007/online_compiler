@@ -12,10 +12,9 @@ const Output=()=>{
         if(res.Errors==="No")
         dispatch(outputstatusaction(""));
         else{
-          console.log(res.Errors.substring(8,14))
         dispatch(outputstatusaction(
           res.Errors
-            ? res.Errors.substring(8, 14) === "killed"
+            ? res.Errors.substring(0,4) === "kill"
               ? "Time Limit Exceeded"
               : "Runtime Error/Compilation Error"
             : "Success"
@@ -36,6 +35,7 @@ return(
         
         {res.Result==="No"?"Output is empty": status==="Success"?res.Result:res.Errors}
         </pre>
+        <br></br>
     </div>
 );
 

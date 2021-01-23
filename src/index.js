@@ -20,8 +20,10 @@ const firebaseapp=firebase.initializeApp(firebaseConfig);
 const db=firebaseapp.firestore();
 const auth=firebaseapp.auth();
 const provider= new firebase.auth.GoogleAuthProvider();
+
 export {auth,provider}
 export default db;
+
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>

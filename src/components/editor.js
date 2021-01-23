@@ -5,25 +5,28 @@ import 'ace-builds/src-noconflict/mode-c_cpp';
 import "ace-builds/src-noconflict/theme-twilight";
 import "ace-builds/src-noconflict/theme-dreamweaver";
 import "ace-builds/src-noconflict/ext-language_tools";
-import  {useSelector } from "react-redux";
-const Editor=({
-    setsourcecode,
-})=>{
+import  {useSelector,useDispatch } from "react-redux";
+import {sourcecodeaction} from '../react-redux/actions';
+const Editor=()=>{
+    const dispatch=useDispatch();
     const handlesourcecode=(newvalue)=>{
-        setsourcecode(newvalue);
+        dispatch(sourcecodeaction(newvalue));
     }
     const obj={
         "C":"c_cpp",
         "C++14":"c_cpp",
         "Python":"python",
     }
+    const value=useSelector(state=>state.sourcecodered);
     const theme=useSelector(state=>state.themered);
-    const lang=useSelector(state=>state.langred);     
+    const lang=useSelector(state=>state.langred);
+     
     return(
         <AceEditor
         mode={obj[lang]}
         fontSize="1.1rem"
         theme={theme==="light"?"dreamweaver":"twilight"}
+        value={value}
         onChange={handlesourcecode}
         showGutter={true}
         highlightActiveLine={true}
