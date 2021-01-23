@@ -11,14 +11,16 @@ const Output=()=>{
       } else {
         if(res.Errors==="No")
         dispatch(outputstatusaction(""));
-        else
+        else{
+          console.log(res.Errors.substring(8,14))
         dispatch(outputstatusaction(
           res.Errors
-            ? res.Errors.substring(0, 4) === "Kill"
+            ? res.Errors.substring(8, 14) === "killed"
               ? "Time Limit Exceeded"
               : "Runtime Error/Compilation Error"
             : "Success"
         ));
+        }
       }
 return(
     <div className="ouput"
