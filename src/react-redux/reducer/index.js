@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 import compilereducer from './compile';
 import inputred from "./input";
+
 const opstatusred=(state="",action)=>{
     if(action.type==="opstatus"){
         const str=action.payload;

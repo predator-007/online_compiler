@@ -11,6 +11,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import  Dropdown from "react-bootstrap/Dropdown";
 import Collapse from "@material-ui/core/Collapse";
 import {themeaction} from '../react-redux/actions';
+import db from '../index'; 
 const Main=()=>{
     const [sourcecode,setsourcecode]=useState(null);
     const [open,setopen]=useState(true);
@@ -20,6 +21,7 @@ const Main=()=>{
     const status=useSelector(state=>state.opstatusred);
     const theme=useSelector(state=>state.themered);
     const lang=useSelector(state=>state.langred);
+    const res=useSelector(state=>state.cmpred);
     const obj={
         "Python": "24",
         "C++14": "7",
@@ -56,6 +58,21 @@ const Main=()=>{
         dispatch(outputaction(data));
         setloading(false);
     }
+    const savecode=()=>{
+        const name=prompt("Enter the name of code");
+        const date=new Date();
+        if(name){
+        db.collection('code').add({
+            name:name,
+            ...res,
+            input:input,
+            opstatus:status,
+            lang:lang,
+            date:date.getDate(),
+            time:date.getTime(),
+        })
+        }
+    }
 return(
 <Container>
     <Row>
@@ -87,6 +104,9 @@ return(
             <Dropdown.Item onClick={()=>dispatch(themeaction("dark"))}>Dark</Dropdown.Item>
         </Dropdown.Menu>
         </Dropdown>
+        </div>
+        <div className="container">
+            <Button variant="outline-info" onClick={()=>savecode()}>Save code</Button>
         </div>
     </Col>        
     </Row>
